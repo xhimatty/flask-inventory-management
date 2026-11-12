@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Home | Inventory Management{% endblock %}
+{% block content %}
+    <div class="card shadow-sm border-0 p-4">
+        <h1 class="mb-3">{{ greeting }} {{ current_user.name }}</h1>
+        <small class="text-muted mb-3"><em>{{ date_today }}</em></small>
+        <p class="text-muted">Welcome to XhiMatty inventory management system.</p>
+        <p>Monitor stock levels, track inventory movements, and keep product records up to date.</p>
+    </div>
+
+    <div class="row g-3 mt-2">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-4">
+                <p class="text-muted">Total Products</p>
+                <h2 class="mb-0">{{ total_products }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-4">
+                <p class="text-muted">Low Stocks</p>
+                <h2 class="mb-0">{{ low_stock }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-4">
+                <p class="text-muted">Out of Stocks</p>
+                <h2 class="mb-0">{{ out_of_stock }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 mt-4">
+        <h5 class="mb-3">Low Stock Products</h5>
+
+        {% if low_stock_products %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>unit</th>
+                            <th>Reorder Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for product in low_stock_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.sku }}</td>
+                                <td>{{ product.qty }}</td>
+                                <td>{{ product.unit }}</td>
+                                <td>{{ product.reorder_level }}</td>
+                                <td>
+                                    <a href="{{url_for('products.product_detail', product_id=product.id)}}" class="btn btn-sm btn-outline-success">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">No low stock products found.</p>
+        {% endif %}
+    </div>
+
+        <div class="card shadow-sm border-0 p-4 mt-4">
+        <h5 class="mb-3">Out of Stock Products</h5>
+
+        {% if out_of_stock_products %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Reorder Level</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for product in out_of_stock_products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.sku }}</td>
+                                <td>{{ product.reorder_level }}</td>
+                                <td>
+                                    <a href="{{url_for('products.product_detail', product_id=product.id)}}" class="btn btn-sm btn-outline-success">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">No out of stock products found.</p>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 mt-4">
+        <h5 class="mb-3">Recent Stock Movements</h5>
+
+        {% if recent_movements %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Products</th>
+                            <th>Movement Type</th>
+                            <th>Quantity Change</th>
+                            <th>Employee</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for movement in recent_movements %}
+                            <tr>
+                                <td>{{ movement.product.name }}</td>
+                                <td>{{ movement.movement_type|replace('-', '')|title }}</td>
+                                <td>
+                                    {{ '+' if movement.qty_change > 0 else '' }}{{ movement.qty_change }} {{ movement.unit }}
+                                </td>
+                                <td>{{ movement.user.name }}</td>
+                                <td>{{ movement.created_at.strftime('%d-%m-%Y, %H:%M') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-mute mb-0">No stock movement recorded</p>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0 p-4 mt-4">
+        <h6 class="mb-3">Quick Actions</h6>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('products.add_product') }}" class="btn btn-success">
+                Add Product
+            </a>
+
+            <a href="{{ url_for('products.products') }}" class="btn btn-outline-success">
+                View Product
+            </a>
+        </div>
+    </div>
+{% endblock %}

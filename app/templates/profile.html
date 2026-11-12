@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="ccontainer mt-4 d-flex justify-content-center">
+     <div class="card shadow-sm w-100" style="max-width: 600px;">
+        <div class="card-body">
+            <h2>My Profile</h2>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <p><strong>Full Name:</strong> {{ user.name }}</p>
+                    <p><strong>Username:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Role:</strong> {{ user.role|capitalize }}</p>
+                    <p>
+                        <strong>Account Status:</strong>
+                        {% if user.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Date Joined:</strong> {{ user.created_at.strftime('%d %B %Y') }}</p>
+                    <div class="mt-3">
+                        <a href="{{ url_for('auth.change_username') }}" class="btn btn-sm btn-outline-success">Change Username</a>
+                        <a href="{{ url_for('auth.change_password') }}" class="btn btn-sm btn-success">Change Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Product Details{% endblock %}
+{% block content %}
+    <div class="container mt-4">
+        <h2>{{ product.name }}</h2>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('products.edit_product', product_id=product.id) }}" class="btn btn-outline-success btn-sm">
+                    Edit Product
+                </a>
+
+                <a href="{{ url_for('inventory.record_movement', product_id=product.id) }}" class="btn btn-success btn-sm">
+                    Record Stock Movement
+                </a>
+
+                <form method="POST" action="{{ url_for('products.update_product_status', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    {% if product.is_active %}
+                        <input type="hidden" name="action" value="deactivate">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            Deactivate Product
+                        </button>
+                    {% else %}
+                        <input type="hidden" name="action" value="activate">
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            Activate Product
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+            <a href="{{ url_for('products.products') }}" class="btn btn-outline-secondary btn-sm">
+                &larr; Back to Products
+            </a>
+        </div>
+
+        <table class="table table-bordered mt-3">
+            <tr>
+                <th>SKU</th>
+                <td>{{ product.sku }}</td>
+            </tr>
+
+            <tr>
+                <th>Price (&euro;)</th>
+                <td>{{ product.price }}</td>
+            </tr>
+             
+            <tr>
+                <th>Quantity</th>
+                <td>{{ product.qty }} {{ product.unit }}</td>
+            </tr>
+
+            <tr>
+                <th>Status</th>
+                <td>
+                    {% if product.qty == 0 %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                    {% elif product.qty <= product.reorder_level %}
+                        <span class="badge bg-warning text-dark">Low Stock</span>
+                    {% else %}
+                    <span class="badge bg-success">In Stock</span>
+                    {% endif %}
+                </td>
+            </tr>
+             
+            <tr>
+                <th>Reorder Level</th>
+                <td>{{ product.reorder_level }}</td>
+            </tr>
+             
+            <tr>
+                <th>Description</th>
+                <td>{{ product.description or 'No description available' }}</td>
+            </tr>
+
+            <tr>
+                <th>Category</th>
+                <td>{{ product.category.name }}</td>
+            </tr>
+             
+            <tr>
+                <th>Created At</th>
+                <td>{{ product.created_at.strftime('%d-%m-%Y, %H:%M') }}</td>
+            </tr>
+             
+            <tr>
+                <th>Last Updated</th>
+                <td>{{ product.updated_at.strftime('%d-%m-%Y, %H:%M') }}</td>
+            </tr>
+
+            <tr>
+                <th>Is Active</th>
+                <td>
+                    {% if product.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <div class="mt-4">
+            <h4>Stock Movement History</h4>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Movement Type</th>
+                            <th>Quantity Change</th>
+                            <th>Quantity Before</th>
+                            <th>Quantity After</th>
+                            <th>Unit</th>
+                            <th>Reason</th>
+                            <th>Recorded By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if movements %}
+                            {% for movement in movements %}
+                                <tr>
+                                    <td>{{ movement.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                                    <td>{{ movement.movement_type }}</td>
+                                    <td>{{ movement.qty_change }}</td>
+                                    <td>{{ movement.qty_before }}</td>
+                                    <td>{{ movement.qty_after }}</td>
+                                    <td>{{ movement.unit }}</td>
+                                    <td>{{ movement.reason }}</td>
+                                    <td>{{ movement.user.name }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">
+                                    No stock movement records found
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

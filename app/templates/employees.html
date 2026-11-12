@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Employees{% endblock %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="mb-3">
+            <form action="{{ url_for('auth.generate_invitation') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">
+                    Generate Invitation Code
+                </button>
+            </form>
+        </div> 
+    </div>
+
+    <div class="container">
+        <div class="d-flex justify-content-center">
+            <h2 class="mb-4">Employee Dashboard</h2>
+        </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Date Joined</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr>
+                            <td>{{ employee.name }}</td>
+                            <td>{{ employee.username }}</td>
+                            <td>{{ employee.email }}</td>
+                            <td>
+                                {% if employee.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ employee.created_at.strftime('%d-%b-%Y') }}</td>
+                            <td>
+                                {% if employee.is_active %}
+                                    <form action="{{ url_for('auth.update_employee_status', employee_id=employee.id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="action" value="deactivate">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Deactivate
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ url_for('auth.update_employee_status', employee_id=employee.id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="action" value="activate">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            Activate
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No employees registered yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h4>Invitation Management</h4>
+        <p class="mb-3 text-muted">
+            View and monitor employee registration invitation.
+        </p>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Created</th>
+                                <th>Expires</th>
+                                <th>Status</th>
+                                <th>Created By</th>
+                                <th>Redeemed By</th>
+                                <th>Revoked By</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for invitation in invitations %}
+                                <tr>
+                                    <td>{{ invitation.id }}</td>
+                                    <td>{{ invitation.created_at.strftime('%d-%b-%Y, %H:%M') }}</td>
+                                    <td>{{ invitation.expires_at.strftime('%d-%b-%Y, %H:%M') }}</td>
+                                    <td>
+                                        {% if invitation.revoked_at %}
+                                            <span class="badge bg-danger">Revoked</span>
+                                        {% elif invitation.used_at %}
+                                            <span class="badge bg-warning">Used</span>
+                                        {% elif invitation.expires_at <= now %}
+                                            <span class="badge bg-secondary">Epired</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Available</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ invitation.created_by.name }}</td>
+                                    <td>{{ invitation.used_by.name if invitation.used_by else '-' }}</td>
+                                    <td>{{ invitation.revoked_by.name if invitation.revoked_by else '-' }}</td>
+                                    <td>
+                                        {% if not invitation.revoked_at and not invitation.used_at and invitation.expires_at > now %}
+                                            <form action="{{ url_for('auth.revoke_invitation', invitation_id=invitation.id) }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Revoke
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        No invitations have been generated
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
