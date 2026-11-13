@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, flash, url_for, abort, request
+from flask import Blueprint, render_template, redirect, flash, url_for, abort, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.forms import RegistrationForm, LoginForm, ChangeUsernameForm, ChangePasswordForm
 from app.models import User, Invitation
@@ -103,6 +103,7 @@ def login():
 
         if user and user.is_active and user.check_password(form.password.data):
             login_user(user)
+            session.permanent = True
 
             flash('Login successful', 'success')
             return redirect(url_for('main.home'))

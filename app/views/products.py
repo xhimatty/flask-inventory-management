@@ -169,15 +169,16 @@ def update_product_status(product_id):
 
     if action == 'deactivate':
         product.is_active = False
-        flash(f'{product.name} has been deactivated', 'success')
+        message = f'{product.name} has been deactivated'
 
     elif action == 'activate':
         product.is_active = True
-        flash(f'{product.name} has been activated', 'success')
+        message = f'{product.name} has been activated'
 
     else:
         abort(404)
 
     db.session.commit()
+    flash(message, 'success')
 
     return redirect(url_for('products.products'))

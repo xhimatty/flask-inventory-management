@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Add Prouduct{% endblock %}
+{% block title %}Edit Product{% endblock %}
 {% block content %}
     <div class="container mt-4">
         <div class="mb-3">
@@ -35,7 +35,7 @@
 
                             <div class="mb-3">
                                 {{ form.category_id.label(class="form-label") }}
-                                {{ form.category_id(class="form-control") }}
+                                {{ form.category_id(class="form-select") }}
                                 {% for error in form.category_id.errors %}
                                     <small class="text-danger">{{ error }}</small>
                                 {% endfor %}
